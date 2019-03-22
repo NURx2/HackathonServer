@@ -1,11 +1,13 @@
 const utils = require('./utils')
 const bodyParser = require('body-parser')
 const db = require('./db')
+const geo = require('./geo')
 
 function configureRoutes(app) {
     registerMiddlewares(app)
     configureAuth(app)
     configureConcerts(app)
+    configureGeo(app)
 }
 
 function registerMiddlewares(app) {
@@ -47,6 +49,28 @@ function configureConcerts(app) {
         }
         // Login is ok
         res.send(utils.makeError('Not ready'))
+    })
+}
+
+function configureGeo(app) {
+    app.all('/geo/search', (req, res) => {
+        const searchReq = utils.parseSearch(req)
+        console.log(searchReq)
+        if (searchReq.latitude === undefined || searchReq.longitude === undefined) {
+            res.send(utils.makeError('Latitude or longitude is undefined'))
+        } else {
+            if (searchReq.query === undefined) {
+                res.send(utils.makeError('Request query is undefined'))
+            } else if (searchReq.query.length == 0) {
+                res.send(utils.makeOk([]))
+            } else {
+                geo.findPlaces(searchReq.query, searchReq.latitude, searchReq.longitude)
+                    .then(data => {
+                        res.send(utils.makeOk(data))
+                    })
+                    .catch(() => res.send(utils.makeError('Nothing was found')))
+            }
+        }
     })
 }
 

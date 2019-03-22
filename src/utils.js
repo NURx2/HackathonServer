@@ -49,8 +49,23 @@ function generateToken(user) {
     return jwt.sign(user.login, process.env.secret)
 }
 
+function parseSearch(req) {
+    let search = {}
+    if (req.method === 'GET') {
+        search.query = req.query.query
+        search.longitude = req.query.longitude
+        search.latitude = req.query.latitude
+    } else if (req.method === 'POST') {
+        search.query = req.body.query
+        search.longitude = req.body.longitude
+        search.latitude = req.body.latitude
+    }
+    return search
+}
+
 exports.makeError = makeError
 exports.makeOk = makeOk
 exports.user = user
 exports.generateToken = generateToken
 exports.ejectLoginPass = ejectLoginPass
+exports.parseSearch = parseSearch
