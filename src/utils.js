@@ -64,7 +64,7 @@ function ejectRegisterData(req) {
 }
 
 function generateToken(user) {
-    return jwt.sign(user.login, process.env.secret)
+    return jwt.sign({ login: user.login, id: user._id } , process.env.secret)
 }
 
 function parseSearch(req) {
@@ -81,6 +81,11 @@ function parseSearch(req) {
     return search
 }
 
+function ejectAddConcertData(req) {
+    let res = {}
+    return res
+}
+
 exports.makeError = makeError
 exports.makeOk = makeOk
 exports.user = user
@@ -88,3 +93,4 @@ exports.generateToken = generateToken
 exports.ejectLoginPass = ejectLoginPass
 exports.parseSearch = parseSearch
 exports.ejectRegisterData = ejectRegisterData
+exports.ejectAddConcertData = ejectAddConcertData

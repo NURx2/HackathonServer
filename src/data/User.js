@@ -14,14 +14,23 @@ class User {
         if (this.login === undefined || this.token === undefined) return false
         try {
             let verif = jwt.verify(this.token, process.env.secret)
-            if (verif === this.login)
+            if (verif.login === this.login)
                 return true
-            return true
+            return false
         } catch (err) {
             console.log(err)
             return false
         }
         return true
+    }
+
+    getUserId() {
+        try {
+            let decoded = jwt.verify(this.token, process.env.secret)
+            return decoded.id
+        } catch (_) {
+            return undefined
+        }
     }
 }
 

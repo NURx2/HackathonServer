@@ -64,6 +64,27 @@ function configureConcerts(app) {
         // Login is ok
         res.send(utils.makeError('Not ready'))
     })
+
+    app.all('/concerts/add', async (req, res) => {
+        const user = utils.user(req)
+        if (!user.logged()){
+            res.send(utils.makeError('You\'re not logged in'))
+            return
+        }
+        try {
+            let fullUserInfo = await db.getUserById(user.getUserId())
+            console.log(fullUserInfo)
+            if (fullUserInfo.userType !== 'artist') {
+                res.send(utils.makeError('You are not an artist sorry'))
+            } else {
+                const concertInfo = utils.ejectAddConcertData(req)
+                res.send(utils.makeError('This functionality is not provided yet'))
+            }
+        } catch(err) {
+            console.log(err)
+            res.send(utils.makeError('Server error, please try later'))
+        }
+    })
 }
 
 function configureGeo(app) {

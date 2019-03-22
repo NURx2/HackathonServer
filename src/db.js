@@ -1,11 +1,16 @@
 const MongoClient = require('mongodb').MongoClient;
+const ObjectID = require('mongodb').ObjectID
 const User = require('./data/User').User
 
 let isInitialized = false;
 let db;
 
 exports.getUser = function getUser(login, password) {
-    return db.collection('users').findOne({ login : login, password : password});
+    return db.collection('users').findOne({ login : login, password : password });
+}
+
+exports.getUserById = function getUser(userId) {
+    return db.collection('users').findOne({ _id: new ObjectID(userId) });
 }
 
 exports.addUser = function addUser(login, pass, name, surname, ustype) {
