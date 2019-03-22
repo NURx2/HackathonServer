@@ -1,18 +1,8 @@
+const MongoClient = require('mongodb').MongoClient;
 const User = require('./data/User').User
 
-exports.getUser = function(login, password) {
-    return new Promise((resolve, reject) => {
-        if (login === 'demo' && password === 'demo') {
-            let user = new User()
-            user.login = 'demo'
-            user.password = 'demo'
-            user.userType = 'user'
-            user.name = 'Debil'
-            user.surname = 'Durak'
-            resolve(user)
-        }
-        reject()
-    })
+function getUser(login, password) {
+    return db.collection.find({ login : login, password : password});
 }
 
 /**
@@ -27,3 +17,15 @@ exports.getUserConcerts = function(user) {
         reject()
     })
 }
+
+let isInitialized = false;
+let db;
+
+
+MongoClient.connect('mongodb://hack:hackspb123@ds044979.mlab.com:44979/spbdb', function (err, database) {
+    if (err) {
+        return console.log(err);
+    }
+    isInitialized = true;
+    db = database;
+});
