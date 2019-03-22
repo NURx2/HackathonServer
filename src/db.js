@@ -14,3 +14,16 @@ exports.getUser = function(login, password) {
         reject()
     })
 }
+
+/**
+ * @param {User} user - for whom we need to load concerts
+ */
+
+exports.getUserConcerts = function(user) {
+    return new Promise((resove, reject) => {
+        if (user.login === demo) {
+            resolve()
+        }
+        reject()
+    })
+}
