@@ -1,8 +1,29 @@
 const MongoClient = require('mongodb').MongoClient;
 const User = require('./data/User').User
 
-function getUser(login, password) {
-    return db.collection.find({ login : login, password : password});
+let isInitialized = false;
+let db;
+
+exports.getUser = function getUser(login, password) {
+    return db.collection('users').findOne({ login : login, password : password});
+}
+
+exports.addUser = function addUser(login, pass, name, surname, ustype) {
+    return new Promise((resolve, reject) => {
+        let he = new User();
+        he.login = login;
+        he.password = pass;
+        he.name = name;
+        he.surname = surname;
+        he.userType = ustype;
+        db.collection('users').insert(he, function(err) {
+            if (err) {
+                console.log(err);
+                reject(err);
+            }
+            resolve(he);
+        });
+    });
 }
 
 /**
@@ -18,14 +39,10 @@ exports.getUserConcerts = function(user) {
     })
 }
 
-let isInitialized = false;
-let db;
-
-
-MongoClient.connect('mongodb://hack:hackspb123@ds044979.mlab.com:44979/spbdb', function (err, database) {
+MongoClient.connect('mongodb://hack:hackspb123@ds044979.mlab.com:44979/spbdb', { useNewUrlParser : true }, function (err, database) {
     if (err) {
         return console.log(err);
     }
     isInitialized = true;
-    db = database;
+    db = database.db('spbdb');
 });
