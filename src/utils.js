@@ -45,6 +45,24 @@ function ejectLoginPass(req) {
     return undefined
 }
 
+function ejectRegisterData(req) {
+    let res = {}
+    if (req.method === 'GET') {
+        res.login = req.query.login
+        res.password = req.query.password
+        res.name = req.query.name
+        res.surname = req.query.surname
+        res.userType = req.query.userType
+    } else if (req.method === 'POST') {
+        res.login = req.body.login
+        res.password = req.body.password
+        res.name = req.body.name
+        res.surname = req.body.surname
+        res.userType = req.body.userType
+    }
+    return res
+}
+
 function generateToken(user) {
     return jwt.sign(user.login, process.env.secret)
 }
@@ -69,3 +87,4 @@ exports.user = user
 exports.generateToken = generateToken
 exports.ejectLoginPass = ejectLoginPass
 exports.parseSearch = parseSearch
+exports.ejectRegisterData = ejectRegisterData

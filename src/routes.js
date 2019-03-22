@@ -2,6 +2,7 @@ const utils = require('./utils')
 const bodyParser = require('body-parser')
 const db = require('./db')
 const geo = require('./geo')
+const validators = require('./validators')
 
 function configureRoutes(app) {
     registerMiddlewares(app)
