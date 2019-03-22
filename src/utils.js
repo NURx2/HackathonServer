@@ -1,7 +1,7 @@
 require('colors')
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
-let User = require('./data/User').User
+const User = require('./data/User').User
 
 function makeError(error) {
     return { type: 'error', error: error }
