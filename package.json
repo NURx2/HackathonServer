@@ -1,0 +1,19 @@
+{
+  "name": "hackathonserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NevMem/HackathonServer.git"
+  },
+  "author": "NevMem",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NevMem/HackathonServer/issues"
+  },
+  "homepage": "https://github.com/NevMem/HackathonServer#readme"
+}
