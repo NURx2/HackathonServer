@@ -1,5 +1,6 @@
 const utils = require('./utils')
 const bodyParser = require('body-parser')
+const db = require('./db')
 
 function configureRoutes(app) {
     registerMiddlewares(app)
@@ -19,7 +20,17 @@ function registerMiddlewares(app) {
 
 function configureAuth(app) {
     app.all('/auth/login', (req, res) => {
-        res.send(utils.makeError('Not ready'))
+        const logPass = utils.ejectLoginPass(req)
+        const login = logPass.login
+        const password = logPass.password
+        db.getUser(login, password)
+            .then(user => {
+                user.token = utils.generateToken(user)
+                res.send(utils.makeOk(user))
+            })
+            .catch(() => {
+                res.send(utils.makeError('Wrong login or password'))
+            })
     })
 
     app.all('/auth/register', (req, res) => {
