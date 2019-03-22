@@ -36,7 +36,20 @@ function configureAuth(app) {
     })
 
     app.all('/auth/register', (req, res) => {
-        res.send(utils.makeError('Not ready'))
+        const regReq = utils.ejectRegisterData(req)
+        const login = regReq.login, password = regReq.password, name = regReq.name, surname = regReq.surname, userType = regReq.userType
+        const validation = validators.validateRegistrationUserData(login, password, name, surname, userType)
+        if (validation !== undefined) {
+            res.send(utils.makeError(validation))
+        } else {
+            db.addUser(login, password, name, surname, userType)
+                .then(() => {
+                    res.send(utils.makeOk('You were successfully registered'))
+                })
+                .catch(() => {
+                    res.send(utils.makeError('Server database error please try later'))
+                })
+        }
     })
 }
 
