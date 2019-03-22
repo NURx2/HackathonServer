@@ -1,7 +1,7 @@
 require('colors')
 let User = require('./data/User').User
 
-function makeError(err) {
+function makeError(error) {
     return { type: 'error', error: error }
 }
 

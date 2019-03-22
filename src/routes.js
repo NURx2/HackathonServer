@@ -29,7 +29,13 @@ function configureAuth(app) {
 
 function configureConcerts(app) {
     app.all('/concerts/getAll', (req, res) => {
-        const users = utils.user(req)
+        const user = utils.user(req)
+        if (!user.logged()) {
+            res.send(utils.makeError('You\'re not logged in'))
+            return
+        }
+        // Login is ok
+        res.send(utils.makeError('Not ready'))
     })
 }
 
