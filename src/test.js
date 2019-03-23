@@ -26,7 +26,7 @@ socket.on('connect', () => {
             setInterval(() => {
                 console.log('Sending click')
                 socket.emit('emoji clicked', { concertId: ids[0], index: 1 })
-            }, 2500)
+            }, 500)
 
             // for (let i = 1; i != 7; ++i)
                 // socket.emit('emoji clicked', { concertId: ids[0], index: i })

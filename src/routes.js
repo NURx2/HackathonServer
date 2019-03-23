@@ -85,6 +85,11 @@ function registerIOHandlers(connection) {
         }
     })
 
+    connection.socket.on('addToSchedule', concertId => {
+        if (connection.userId)
+            db.addToSchedule(connection.userId, concertId)
+    })
+
     connection.socket.on('emoji clicked', (msg) => {
         console.log(msg)
         const index = msg.index
@@ -96,7 +101,6 @@ function registerIOHandlers(connection) {
             console.log('Bad concert id'.red)
             connection.socket.emit('operation error', 'contestId is empty')
         } else {
-            console.log('Here'.cyan)
             db.clickEmoji(concertId, index)
                 .then(() => {
                     console.log('Succeed'.cyan)
