@@ -86,6 +86,8 @@ function registerIOHandlers(connection) {
     })
 
     connection.socket.on('addToSchedule', concertId => {
+        console.log('Adding to schedule')
+        console.log(concertId, connection.userId)
         if (connection.userId)
             db.addToSchedule(connection.userId, concertId)
     })
