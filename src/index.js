@@ -1,12 +1,13 @@
 const express = require('express')
 const routes = require('./routes')
-const geo = require('./geo')
+const app = express()
+const http = require('http').Server(app)
+const io = require('socket.io')(http)
 require('dotenv').config()
 require('colors')
 
-const app = express()
-
 routes.configureRoutes(app) // Configuring routes
+routes.configureSocketIO(io)
 
 app.listen(80, err => {
     if (!err) {

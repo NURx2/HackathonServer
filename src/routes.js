@@ -3,12 +3,68 @@ const bodyParser = require('body-parser')
 const db = require('./db')
 const geo = require('./geo')
 const validators = require('./validators')
+const Connection = require('./data/Connection').Connection
 
 function configureRoutes(app) {
     registerMiddlewares(app)
     configureAuth(app)
     configureConcerts(app)
     configureGeo(app)
+}
+
+const connections = []
+
+function configureSocketIO(io) {
+    io.on('connection', socket => {
+        const connection = new Connection(socket)
+
+        registerIOHandlers(connection)
+
+        connections.add(connection)
+    })
+}
+
+function registerIOHandlers(connection) {
+    connection.socket.on('auth', async data => {
+        let login = data.login
+        let password = data.password
+        let user = db.getUser(login, password)
+        if (user !== undefined) {
+            const token = utils.generateToken(users)
+            connection.authenticated = true
+            connection.socket.emit('auth succeed', { user })
+        } else {
+            connection.socket.emit('auth failed', 'Wrong login or password')
+        }     
+    })
+
+    connection.socket.on('getAllConcerts', (msg) => {
+        if (connection.authenticated) {
+            db.getAllConcerts()
+                .then(data => {
+                    connection.socket.emit('allConcerts', data)
+                })
+                .catch(err => {
+                    connection.socket.emit('error', err)
+                })
+        } else {
+            connection.socket.emit('error', 'You are not logged in')
+        }
+    })
+
+    connection.socket.on('getUserConcerts', (msg) => {
+        if (connection.authenticated) {
+            db.getUserConcerts(connection.userId)
+                .then(data => {
+                    connection.socket.emit('userConcerts', data)
+                })
+                .catch(err => {
+                    connection.socket.emit('error', err)
+                })
+        } else {
+            connection.socket.emit('error', 'You are not logged in')
+        }
+    })
 }
 
 function registerMiddlewares(app) {
