@@ -35,7 +35,7 @@ function registerIOHandlers(connection) {
             connection.socket.emit('auth succeed', { user })
         } else {
             connection.socket.emit('auth failed', 'Wrong login or password')
-        }     
+        }
     })
 
     connection.socket.on('getAllConcerts', (msg) => {
