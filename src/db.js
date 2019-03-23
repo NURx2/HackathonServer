@@ -4,6 +4,7 @@ const User = require('./data/User').User
 
 let isInitialized = false;
 let db;
+let client
 
 exports.getUser = function getUser(login, password) {
     return db.collection('users').findOne({ login : login, password : password });
@@ -44,10 +45,41 @@ exports.getUserConcerts = function(user) {
     })
 }
 
-MongoClient.connect('mongodb://hack:hackspb123@ds044979.mlab.com:44979/spbdb', { useNewUrlParser : true }, function (err, database) {
+exports.dropConcerts = function() {
+    return new Promise((resolve, reject) => {
+        db.collection('concerts')
+            .deleteMany({})
+            .then(() => resolve())
+            .catch(err => {
+                console.log(err)
+                reject()
+            })
+    })
+}
+
+exports.addConcerts = function(data) {
+    return new Promise((resolve, reject) => {
+        db.collection('concerts')
+            .insertMany(data)
+            .then(data => {
+                resolve(data.insertedCount)
+            })
+            .catch(err => {
+                console.log(err)
+                reject()
+            })
+    })
+}
+
+exports.close = () => {
+    client.close()
+}
+
+MongoClient.connect('mongodb://hack:hackspb123@ds044979.mlab.com:44979/spbdb', { useNewUrlParser : true }, function (err, client_) {
     if (err) {
         return console.log(err);
     }
     isInitialized = true;
-    db = database.db('spbdb');
+    client = client_;
+    db = client.db('spbdb');
 });
