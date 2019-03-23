@@ -35,14 +35,17 @@ exports.addUser = function addUser(login, pass, name, surname, ustype) {
 }
 
 function loadConcert(concertId) {
+    console.log('loadConcert with id'.cyan, concertId)
     return db.collection('concerts').findOne({ _id: ObjectID(concertId) })
 }
 
 function loadConcertsInfo(concertIds) {
+    console.log('loadConcertInfo with', concertIds)
     return new Promise((resolve, reject) => {
         let promises = concertIds.map(id => loadConcert(id))
         Promise.all(promises)
             .then(data => {
+                console.log(data)
                 data.sort((first, second) => {
                     if (first.date < second.date) return -1
                     if (first.date > second.date) return 1
@@ -135,6 +138,23 @@ exports.addConcerts = function(data) {
     })
 }
 
+exports.clickEmoji = function(concertId, emojiIndex) {
+    console.log(concertId, emojiIndex)
+    return new Promise((resolve, reject) => {
+        return db.collection('concerts')
+            .updateOne({ _id: ObjectID(concertId) }, { $inc: { [`emoji.${emojiIndex - 1}`]: 1 } }, (err, data) => {
+                if (err !== null) {
+                    console.log(err)
+                    reject()
+                } else {
+                    resolve()
+                }
+            })
+    })
+}
+
+exports.getDB = () => db
+
 exports.close = () => {
     client.close()
 }
@@ -143,6 +163,7 @@ MongoClient.connect('mongodb://hack:hackspb123@ds044979.mlab.com:44979/spbdb', {
     if (err) {
         return console.log(err);
     }
+    console.log('Databse connected')
     isInitialized = true;
     client = client_;
     db = client.db('spbdb');

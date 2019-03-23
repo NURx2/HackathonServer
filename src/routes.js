@@ -12,15 +12,23 @@ function configureRoutes(app) {
     configureGeo(app)
 }
 
-const connections = []
+let connections = []
 
 function configureSocketIO(io) {
     io.on('connection', socket => {
+        console.log('New connection'.magenta)
         const connection = new Connection(socket)
 
         registerIOHandlers(connection)
 
-        connections.add(connection)
+        connections.push(connection)
+    })
+}
+
+function broadcastEmojiClick(concertId, index) {
+    console.log(`Broadcasting new emoji ${index} ${concertId}`)
+    connections.forEach(conn => {
+        conn.socket.emit('tray new emoji', { index: index, concertId: concertId })
     })
 }
 
@@ -28,41 +36,76 @@ function registerIOHandlers(connection) {
     connection.socket.on('auth', async data => {
         let login = data.login
         let password = data.password
-        let user = db.getUser(login, password)
-        if (user !== undefined) {
-            const token = utils.generateToken(users)
+        console.log(`${login} ${password}`.magenta)
+        let user = await db.getUser(login, password)
+        if (user !== undefined && user !== null) {
+            console.log('Successfully authorized'.green)
+            const token = utils.generateToken(user)
+            user.token = token
+            console.log(user)
+            connection.userId = user._id
             connection.authenticated = true
             connection.socket.emit('auth succeed', { user })
         } else {
+            console.log('Wrong login attempt'.red)
             connection.socket.emit('auth failed', 'Wrong login or password')
         }
     })
 
     connection.socket.on('getAllConcerts', (msg) => {
         if (connection.authenticated) {
+            console.log('getAllConcerts was called'.yellow)
             db.getAllConcerts()
                 .then(data => {
+                    console.log('Sending all concerts'.yellow)
                     connection.socket.emit('allConcerts', data)
                 })
                 .catch(err => {
-                    connection.socket.emit('error', err)
+                    connection.socket.emit('loading error', err)
                 })
         } else {
-            connection.socket.emit('error', 'You are not logged in')
+            console.log(connection.socket)
+            connection.socket.emit('loading error', 'You are not logged in')
         }
     })
 
     connection.socket.on('getUserConcerts', (msg) => {
         if (connection.authenticated) {
+            console.log('getUserConcerts was called'.yellow)
             db.getUserConcerts(connection.userId)
                 .then(data => {
+                    console.log('Sending user concerts'.yellow)
                     connection.socket.emit('userConcerts', data)
                 })
                 .catch(err => {
-                    connection.socket.emit('error', err)
+                    connection.socket.emit('loading error', err)
                 })
         } else {
-            connection.socket.emit('error', 'You are not logged in')
+            connection.socket.emit('loading error', 'You are not logged in')
+        }
+    })
+
+    connection.socket.on('emoji clicked', (msg) => {
+        console.log(msg)
+        const index = msg.index
+        const concertId = msg.concertId
+        if (index < 1 || index > 6) {
+            console.log('Bad index'.red)
+            connection.socket.emit('operation error', 'Your indes is bad')
+        } else if (concertId === undefined) {
+            console.log('Bad concert id'.red)
+            connection.socket.emit('operation error', 'contestId is empty')
+        } else {
+            console.log('Here'.cyan)
+            db.clickEmoji(concertId, index)
+                .then(() => {
+                    console.log('Succeed'.cyan)
+                    broadcastEmojiClick(concertId, index)
+                })
+                .catch((err) => {
+                    console.log(err)
+                    console.log('Errored'.red)
+                })
         }
     })
 }
@@ -206,3 +249,4 @@ function configureGeo(app) {
 }
 
 exports.configureRoutes = configureRoutes
+exports.configureSocketIO = configureSocketIO

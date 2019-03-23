@@ -177,6 +177,7 @@ async function job() {
             now.location = {}
             now.location.latitude = addressMapper[row.address].position[0]
             now.location.longitude = addressMapper[row.address].position[1]
+            now.isActive = false
             goodData.push(now)
         }
     })
