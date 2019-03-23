@@ -9,7 +9,7 @@ require('colors')
 routes.configureRoutes(app) // Configuring routes
 routes.configureSocketIO(io)
 
-http.listen(80, err => {
+http.listen(process.env.port, err => {
     if (!err) {
         console.log('Server is now running'.green)
     } else {
