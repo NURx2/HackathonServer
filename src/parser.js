@@ -44,6 +44,7 @@ function parseOnePageTicketLand(url) {
                 let times = $('.cell.date > .times').map((index, elem) => elem.children.length == 1 ? elem.children[0].data : elem.children[2].data ).toArray().map((elem) => elem.trim().split('\n')[1].trim())
                 let addrs = $('.cell.name').map((index, elem) => elem.children[2].attribs.title).toArray()
 
+                let posters = $('.venue_img').map((_, elem) => elem.attribs.src).toArray().map(str => 'https:' + str)
                 const amount = labels.length
                 let schedule = []
                 for (let i = 0; i != amount; ++i) {
@@ -55,6 +56,8 @@ function parseOnePageTicketLand(url) {
                         label: labels[i],
                         date: date,
                         address: addrs[i],
+                        poster: posters[i],
+                        artists: []
                     })
                 }
                 console.log('Loaded'.green)
@@ -85,7 +88,50 @@ function parseSpbTicketLand() {
     })
 }
 
-parseSpbTicketLand().then(async (data) => {
+function loadPage(url) {
+    return new Promise((resolve, reject) => {
+        request.get(url, (err, data) => {
+            if (err !== null) {
+                console.log(err)
+                reject()
+            } else {
+                let $ = cheerio.load(data.body)
+                let events = $('.event.js-ec-impression').map((index, elem) => {
+                    return JSON.parse(elem.children[0].parent.attribs['data-ec-item'])
+                }).toArray()
+
+                let schedule = []
+                for (let i = 0; i != events.length; ++i) {
+                    schedule.push({
+                        label: events[i].eventName,
+                        date: new Date(events[i].date),
+                        address: events[i].venueName,
+                        poster: events[i].image,
+                        artists: []
+                    })
+                }
+
+                resolve(schedule)
+            }
+        })
+    })
+}
+
+function parseSpbKassir() {
+    return new Promise((resolve, reject) => {
+        loadPage('https://spb.kassir.ru/bilety-na-koncert')
+            .then((data) => {
+                resolve(data)
+            })
+    })
+}
+
+async function job() {
+    let data = []
+    let kassir = await parseSpbKassir()
+    let ticketland = await parseSpbTicketLand()
+    data = data.concat(kassir, ticketland)
+
     let uniqueAddresses = new Set()
     data.forEach(elem => {
         if (!(elem.address in uniqueAddresses))
@@ -93,7 +139,7 @@ parseSpbTicketLand().then(async (data) => {
     })
     let usefull = new Set()
     let addressMapper = {}
-    
+
     async function asyncForEach(array, callback) {
         for (let i = 0; i != array.length; ++i) {
             await callback(array[i])
@@ -139,4 +185,6 @@ parseSpbTicketLand().then(async (data) => {
     const inserted = await db.addConcerts(goodData)
     console.log(`Was inserted ${inserted}`)
     db.close()
-})
+}
+
+job()

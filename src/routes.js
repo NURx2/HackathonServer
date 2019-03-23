@@ -15,8 +15,7 @@ function registerMiddlewares(app) {
     app.use(bodyParser.json())
     app.use(bodyParser.urlencoded({ extended: true }))
     app.use((req, res, next) => {
-        let user = utils.user(req)
-        console.log(user)
+        console.log(`[${req.method}] ${req.url}`.cyan)
         next()
     })
 }
@@ -56,16 +55,57 @@ function configureAuth(app) {
 
 function configureConcerts(app) {
     app.all('/concerts/getAll', (req, res) => {
-        const user = utils.user(req)
-        if (!user.logged()) {
+        const token = utils.ejectToken(req)
+        const userInfo = utils.decodeToken(token)
+        if (userInfo === undefined) {
             res.send(utils.makeError('You\'re not logged in'))
             return
         }
-        // Login is ok
-        res.send(utils.makeError('Not ready'))
+        db.getAllConcerts()
+            .then(data => {
+                res.send(utils.makeOk(data))
+            })
+            .catch(err => {
+                res.send(utils.makeError(err))
+            })
     })
 
-    app.all('/concerts/add', async (req, res) => {
+    app.all('/concerts/addToSchedule', (req, res) => {
+        const token = utils.ejectToken(req)
+        const concertId = utils.ejectConcertId(req)
+        const userInfo = utils.decodeToken(token)
+        if (concertId === undefined) {
+            res.send(utils.makeError('Please specify concertId'))
+        } else if (userInfo === undefined) {
+            res.send(utils.makeError('Please login'))
+        } else {
+            db.addToSchedule(userInfo.id, concertId)
+                .then(msg => {
+                    res.send(utils.makeOk(msg))
+                })
+                .catch(() => {
+                    res.send(utils.makeError('Server error, please try later'))
+                })
+        }
+    })
+
+    app.all('/concerts/getUserConcerts', (req, res) => {
+        const token = utils.ejectToken(req)
+        const userInfo = utils.decodeToken(token)
+        if (userInfo === undefined) {
+            res.send(db.makeOk('Please login'))
+        } else {
+            db.getUserConcerts(userInfo.id)
+                .then(data => {
+                    res.send(utils.makeOk(data))
+                })
+                .catch(() => {
+                    res.send(utils.makeError('Server error'))
+                })
+        }
+    })
+
+    app.all('/concerts/createNewConcert', async (req, res) => {
         const user = utils.user(req)
         if (!user.logged()){
             res.send(utils.makeError('You\'re not logged in'))

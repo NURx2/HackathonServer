@@ -28,6 +28,25 @@ function user(req) {
     return undefined
 }
 
+function ejectToken(req) {
+    if (req.method === 'GET') {
+        return req.query.token
+    } else if (req.method === 'POST') {
+        return req.body.token
+    }
+    return undefined
+}
+
+function decodeToken(token) {
+    try {
+        let decoded = jwt.verify(token, process.env.secret)
+        return decoded
+    } catch (err) {
+        console.log(`${err}\n${token}`.red)
+        return undefined
+    }
+}
+
 function ejectLoginPass(req) {
     if (req.method === 'GET') {
         return {
@@ -81,6 +100,15 @@ function parseSearch(req) {
     return search
 }
 
+function ejectConcertId(req) {
+    if (req.method === 'GET') {
+        return req.query.concertId
+    } else if (req.method === 'POST') {
+        return req.body.concertId
+    }
+    return undefined
+}
+
 function ejectAddConcertData(req) {
     let res = {}
     return res
@@ -94,3 +122,6 @@ exports.ejectLoginPass = ejectLoginPass
 exports.parseSearch = parseSearch
 exports.ejectRegisterData = ejectRegisterData
 exports.ejectAddConcertData = ejectAddConcertData
+exports.ejectToken = ejectToken
+exports.decodeToken = decodeToken
+exports.ejectConcertId = ejectConcertId
