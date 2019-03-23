@@ -3,12 +3,44 @@ const bodyParser = require('body-parser')
 const db = require('./db')
 const geo = require('./geo')
 const validators = require('./validators')
+const Connection = require('./data/Connection').Connection
 
 function configureRoutes(app) {
     registerMiddlewares(app)
     configureAuth(app)
     configureConcerts(app)
     configureGeo(app)
+}
+
+const connections = []
+
+function configureSocketIO(io) {
+    io.on('connection', socket => {
+        const connection = new Connection(socket)
+
+        registerIOHandlers(connection)
+
+        connections.add(connection)
+    })
+}
+
+function registerIOHandlers(connection) {
+    connection.socket.on('auth', async data => {
+        let login = data.login
+        let password = data.password
+        let user = db.getUser(login, password)
+        if (user !== undefined) {
+            const token = utils.generateToken(users)
+            connection.authenticated = true
+            connection.socket.sned('auth succeed', { token: token })
+        } else {
+            connection.socket.send('auth failed', { mesage: 'Wrong login or password' })
+        }     
+    })
+
+    connection.socket.on('getAllConcerts', (msg) => {
+        
+    })
 }
 
 function registerMiddlewares(app) {
