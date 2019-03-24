@@ -24,6 +24,13 @@ app.post('/toggleActive', (req, res) => {
         })
 })
 
+app.post('/changeDate', (req, res) => {
+    const concertId = req.body.concertId
+    const date = req.body.date
+    db.changeDate(concertId, date)
+    res.send({ type: 'ok' })
+})
+
 db.onConnect(() => {
     app.listen(80, err => {
         if (err) {
