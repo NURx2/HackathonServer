@@ -135,15 +135,19 @@ exports.toggleActivation = function(concertId) {
                     reject('Not found')
                     return
                 }
-                let newValue = data.isActive ^ 1
+                console.log(data)
+                let newValue = data.isActive ^ true
                 return db.collection('concerts')
-                    .updateOne({ _id: ObjectID(data._id) }, { isActive: newValue })
+                    .updateOne({ _id: ObjectID(data._id + '') }, { $set: { isActive: newValue } })
             })
             .then(data => {
                 console.log(data)
                 resolve()
             })
-            .catch(err => reject(err))
+            .catch(err => {
+                console.log(err)
+                reject()
+            })
     })
 }
 

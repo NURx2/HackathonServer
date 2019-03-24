@@ -1,12 +1,28 @@
 const db = require('./db')
 const io = require('socket.io-client')
 const ObjectID = require('mongodb').ObjectID
+const bParser = require('body-parser')
+const utils = require('./utils')
 require('colors')
 
 const express = require('express')
 let app = express()
 
 app.use('/', express.static(__dirname + '/public/'))
+app.use(bParser.json())
+
+app.post('/toggleActive', (req, res) => {
+    const concertId = req.body.concertId
+    console.log(concertId)
+    db.toggleActivation(concertId)
+        .then(data => {
+            console.log(data)
+            res.send(utils.makeOk())
+        })
+        .catch(err => {
+            res.send(utils.makeError())
+        })
+})
 
 db.onConnect(() => {
     app.listen(80, err => {
