@@ -45,7 +45,9 @@ function loadConcertsInfo(concertIds) {
         let promises = concertIds.map(id => loadConcert(id))
         Promise.all(promises)
             .then(data => {
-                console.log(data)
+                console.log(data.length)
+                data = data.filter(row => row != null)
+                console.log(data.length)
                 data.sort((first, second) => {
                     if (first.date < second.date) return -1
                     if (first.date > second.date) return 1
@@ -124,6 +126,39 @@ exports.dropConcerts = function() {
     })
 }
 
+exports.toggleActivation = function(concertId) {
+    return new Promise((resolve, reject) => {
+        loadConcert(concertId)
+            .then(data => {
+                if (data === null) {
+                    reject('Not found')
+                    return
+                }
+                let newValue = data.isActive ^ 1
+                return db.collection('concerts')
+                    .updateOne({ _id: ObjectID(data._id) }, { isActive: newValue })
+            })
+            .then(data => {
+                console.log(data)
+                resolve()
+            })
+            .catch(err => reject(err))
+    })
+}
+
+exports.deleteConcert = function(concertId) {
+    return new Promise((resolve, reject) => {
+        db.collection('concerts')
+            .deleteOne({ _id: ObjectID(concertId) })
+            .then(data => {
+                resolve(data.result)
+            })
+            .catch(err => {
+                resolve(err)
+            })
+    })
+}
+
 exports.addConcerts = function(data) {
     return new Promise((resolve, reject) => {
         db.collection('concerts')
@@ -159,12 +194,17 @@ exports.close = () => {
     client.close()
 }
 
+let connectCallback = undefined
+exports.onConnect = cb => { connectCallback = cb }
+
 MongoClient.connect('mongodb://hack:hackspb123@ds044979.mlab.com:44979/spbdb', { useNewUrlParser : true }, function (err, client_) {
     if (err) {
         return console.log(err);
     }
     console.log('Databse connected')
-    isInitialized = true;
-    client = client_;
-    db = client.db('spbdb');
+    isInitialized = true
+    client = client_
+    db = client.db('spbdb')
+    if (connectCallback !== undefined)
+        connectCallback()
 });
