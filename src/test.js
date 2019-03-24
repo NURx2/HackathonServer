@@ -1,34 +1,52 @@
 const db = require('./db')
 const io = require('socket.io-client')
+const ObjectID = require('mongodb').ObjectID
 require('colors')
 
+const express = require('express')
+let app = express()
+
+app.use('/', express.static(__dirname + '/public/'))
+
 db.onConnect(() => {
-    db.getAllConcerts()
-        .then(async data => {
-            console.log(data.length)
-            // let amount = 0
-            // for (let i = 0; i != data.length; ++i) {
-            //     if (new Date(data[i].date) < new Date() || new Date(new Date().getTime() + 2592000000) <= new Date(data[i].date)) {
-            //         try {
-            //             let res = await db.deleteConcert(data[i]._id)
-            //             if (res.n == 1) {
-            //                 console.log('Removed')
-            //             } else {
-            //                 console.log('Not found')
-            //             }
-            //         } catch(err) {
-            //             console.log(err)
-            //         }
-            //     }
-            // }
-        })
-        .catch(err => {
+    app.listen(80, err => {
+        if (err) {
             console.log(err)
-        })
-        .finally(() => {
-            db.close()
-        })
+        } else {
+            console.log('Started')
+        }
+    })
 })
+
+// db.onConnect(() => {
+//     db.getAllConcerts()
+//         .then(async data => {
+//             let amount = 0
+//             for (let i = 0; i != data.length; ++i) {
+//                 if (new Date() <= new Date(data[i].date) && new Date(data[i].date) <= new Date(new Date().getTime() + 259200000 * 2)) {
+//                     await db.addToSchedule('5c9553ade7179a0e408b7407', data[i]._id + '')
+//                     // amount += 1
+//                     // console.log(new Date(data[i].date))
+//                     /* try {
+//                         let res = await db.deleteConcert(data[i]._id)
+//                         if (res.n == 1) {
+//                             console.log('Removed')
+//                         } else {
+//                             console.log('Not found')
+//                         }
+//                     } catch(err) {
+//                         console.log(err)
+//                     } */ 
+//                 }
+//             }
+//         })
+//         .catch(err => {
+//             console.log(err)
+//         })
+//         .finally(() => {
+//             db.close()
+//         })
+// })
 
 // const socket = io.connect('http://zverevkazan.com:81')
 

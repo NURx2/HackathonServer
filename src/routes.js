@@ -160,12 +160,12 @@ function configureAuth(app) {
 
 function configureConcerts(app) {
     app.all('/concerts/getAll', (req, res) => {
-        const token = utils.ejectToken(req)
-        const userInfo = utils.decodeToken(token)
-        if (userInfo === undefined) {
-            res.send(utils.makeError('You\'re not logged in'))
-            return
-        }
+        // const token = utils.ejectToken(req)
+        // const userInfo = utils.decodeToken(token)
+        // if (userInfo === undefined) {
+        //     res.send(utils.makeError('You\'re not logged in'))
+        //     return
+        // }
         db.getAllConcerts()
             .then(data => {
                 res.send(utils.makeOk(data))

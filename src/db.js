@@ -1,4 +1,4 @@
-const MongoClient = require('mongodb').MongoClient;
+const MongoClient = require('mongodb').MongoClient
 const ObjectID = require('mongodb').ObjectID
 const User = require('./data/User').User
 
@@ -81,9 +81,10 @@ exports.getUserConcerts = function(userId) {
 }
 
 exports.addToSchedule = function addToSchedule(userId, concertId) {
+    console.log(concertId)
     return new Promise((resolve, reject) => {
         db.collection('users')
-            .updateOne({ _id: ObjectID(userId) }, { $addToSet: { concerts: concertId } })
+            .updateOne({ _id: new ObjectID(userId) }, { $addToSet: { concerts: concertId } })
             .then(data => data.result)
             .then(result => {
                 if (result.nModified == 0) {
